@@ -48,36 +48,10 @@
 
         <div class="panel" data-step="2" hidden>
           <h2>Di che provincia sei?</h2>
-          <input type="text" name="entry.1182764325" list="province-list" placeholder="Inizia a scrivere..." autocomplete="off">
-          <datalist id="province-list">
-            <option value="Agrigento"><option value="Alessandria"><option value="Ancona"><option value="Aosta">
-            <option value="Arezzo"><option value="Ascoli Piceno"><option value="Asti"><option value="Avellino">
-            <option value="Bari"><option value="Barletta-Andria-Trani"><option value="Belluno"><option value="Benevento">
-            <option value="Bergamo"><option value="Biella"><option value="Bologna"><option value="Bolzano">
-            <option value="Brescia"><option value="Brindisi"><option value="Cagliari"><option value="Caltanissetta">
-            <option value="Campobasso"><option value="Caserta"><option value="Catania"><option value="Catanzaro">
-            <option value="Chieti"><option value="Como"><option value="Cosenza"><option value="Cremona">
-            <option value="Crotone"><option value="Cuneo"><option value="Enna"><option value="Fermo">
-            <option value="Ferrara"><option value="Firenze"><option value="Foggia"><option value="Forlì-Cesena">
-            <option value="Frosinone"><option value="Genova"><option value="Gorizia"><option value="Grosseto">
-            <option value="Imperia"><option value="Isernia"><option value="L'Aquila"><option value="La Spezia">
-            <option value="Latina"><option value="Lecce"><option value="Lecco"><option value="Livorno">
-            <option value="Lodi"><option value="Lucca"><option value="Macerata"><option value="Mantova">
-            <option value="Massa-Carrara"><option value="Matera"><option value="Messina"><option value="Milano">
-            <option value="Modena"><option value="Monza e della Brianza"><option value="Napoli"><option value="Novara">
-            <option value="Nuoro"><option value="Oristano"><option value="Padova"><option value="Palermo">
-            <option value="Parma"><option value="Pavia"><option value="Perugia"><option value="Pesaro e Urbino">
-            <option value="Pescara"><option value="Piacenza"><option value="Pisa"><option value="Pistoia">
-            <option value="Pordenone"><option value="Potenza"><option value="Prato"><option value="Ragusa">
-            <option value="Ravenna"><option value="Reggio Calabria"><option value="Reggio Emilia"><option value="Rieti">
-            <option value="Rimini"><option value="Roma"><option value="Rovigo"><option value="Salerno">
-            <option value="Sassari"><option value="Savona"><option value="Siena"><option value="Siracusa">
-            <option value="Sondrio"><option value="Sud Sardegna"><option value="Taranto"><option value="Teramo">
-            <option value="Terni"><option value="Torino"><option value="Trapani"><option value="Trento">
-            <option value="Treviso"><option value="Trieste"><option value="Udine"><option value="Varese">
-            <option value="Venezia"><option value="Verbano-Cusio-Ossola"><option value="Vercelli"><option value="Verona">
-            <option value="Vibo Valentia"><option value="Vicenza"><option value="Viterbo"><option value="Estero">
-          </datalist>
+          <div class="autocomplete">
+            <input type="text" id="q_provincia" name="entry.1182764325" placeholder="Inizia a scrivere..." autocomplete="off" autocapitalize="words">
+            <div class="autocomplete-list" id="provinciaList" hidden></div>
+          </div>
           <p class="field-error">Scrivi il nome della tua provincia.</p>
         </div>
 
@@ -161,6 +135,42 @@
   var introScreen = document.getElementById('introScreen');
   var stepperScreen = document.getElementById('stepperScreen');
   var form = document.getElementById('surveyForm');
+
+  var PROVINCE = ["Agrigento","Alessandria","Ancona","Aosta","Arezzo","Ascoli Piceno","Asti","Avellino","Bari","Barletta-Andria-Trani","Belluno","Benevento","Bergamo","Biella","Bologna","Bolzano","Brescia","Brindisi","Cagliari","Caltanissetta","Campobasso","Caserta","Catania","Catanzaro","Chieti","Como","Cosenza","Cremona","Crotone","Cuneo","Enna","Fermo","Ferrara","Firenze","Foggia","Forlì-Cesena","Frosinone","Genova","Gorizia","Grosseto","Imperia","Isernia","L'Aquila","La Spezia","Latina","Lecce","Lecco","Livorno","Lodi","Lucca","Macerata","Mantova","Massa-Carrara","Matera","Messina","Milano","Modena","Monza e della Brianza","Napoli","Novara","Nuoro","Oristano","Padova","Palermo","Parma","Pavia","Perugia","Pesaro e Urbino","Pescara","Piacenza","Pisa","Pistoia","Pordenone","Potenza","Prato","Ragusa","Ravenna","Reggio Calabria","Reggio Emilia","Rieti","Rimini","Roma","Rovigo","Salerno","Sassari","Savona","Siena","Siracusa","Sondrio","Sud Sardegna","Taranto","Teramo","Terni","Torino","Trapani","Trento","Treviso","Trieste","Udine","Varese","Venezia","Verbano-Cusio-Ossola","Vercelli","Verona","Vibo Valentia","Vicenza","Viterbo","Estero"];
+
+  var provinciaInput = document.getElementById('q_provincia');
+  var provinciaList = document.getElementById('provinciaList');
+
+  function renderProvinciaList(matches){
+    provinciaList.innerHTML = '';
+    if (!matches.length){ provinciaList.hidden = true; return; }
+    matches.slice(0, 8).forEach(function(name){
+      var item = document.createElement('div');
+      item.className = 'autocomplete-item';
+      item.textContent = name;
+      item.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      item.addEventListener('click', function(){
+        provinciaInput.value = name;
+        provinciaList.hidden = true;
+      });
+      provinciaList.appendChild(item);
+    });
+    provinciaList.hidden = false;
+  }
+
+  provinciaInput.addEventListener('input', function(){
+    var q = provinciaInput.value.trim().toLowerCase();
+    if (!q){ provinciaList.hidden = true; return; }
+    var matches = PROVINCE.filter(function(name){ return name.toLowerCase().indexOf(q) === 0; });
+    if (!matches.length){ matches = PROVINCE.filter(function(name){ return name.toLowerCase().indexOf(q) !== -1; }); }
+    renderProvinciaList(matches);
+  });
+  provinciaInput.addEventListener('focus', function(){
+    if (provinciaInput.value.trim()) provinciaInput.dispatchEvent(new Event('input'));
+  });
+  provinciaInput.addEventListener('blur', function(){
+    setTimeout(function(){ provinciaList.hidden = true; }, 150);
+  });
 
   function validate(i){
     var panel = panels[i];
