@@ -137,6 +137,12 @@
 <script>
 (function(){
   try{
+    if(location.search.indexOf('reset=1') !== -1){
+      localStorage.removeItem('sondaggioStatale_submitted');
+      history.replaceState(null, '', location.pathname);
+    }
+  }catch(e){}
+  try{
     if(localStorage.getItem('sondaggioStatale_submitted') === '1'){
       document.getElementById('introScreen').style.display = 'none';
       document.getElementById('alreadyDone').style.display = 'block';
