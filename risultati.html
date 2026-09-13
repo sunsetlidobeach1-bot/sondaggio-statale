@@ -15,18 +15,186 @@
 
   <div class="section-head">
     <h2>Risultati</h2>
-    <span class="badge">In attesa di risposte</span>
+    <span class="badge" id="badge">Caricamento&hellip;</span>
   </div>
 
-  <div class="card empty-state">
+  <div class="card empty-state" id="emptyState">
     <div class="icon">&hellip;</div>
-    <h3>Ancora nessuna risposta</h3>
-    <p>Quando arriveranno le prime risposte al sondaggio, qui compariranno i grafici con i dati reali del gruppo (et&agrave;, provenienza, spostamenti).</p>
+    <h3 id="emptyTitle">Caricamento dati&hellip;</h3>
+    <p id="emptyText">Un attimo, sto leggendo le risposte in tempo reale dal foglio Google.</p>
+  </div>
+
+  <div id="liveResults" hidden>
+    <div class="stats">
+      <div class="stat"><div class="val" id="statCount">-</div><div class="lbl">risposte raccolte</div></div>
+      <div class="stat"><div class="val" id="statAge">-</div><div class="lbl">et&agrave; media</div></div>
+      <div class="stat"><div class="val" id="statPendolari">-</div><div class="lbl">pendolari</div></div>
+      <div class="stat"><div class="val" id="statMezzo">-</div><div class="lbl">mezzo pi&ugrave; usato</div></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Distribuzione et&agrave;</h3>
+        <p class="sub">numero di studenti per fascia</p>
+        <canvas id="chartEta" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Da dove vengono</h3>
+        <p class="sub">province pi&ugrave; frequenti</p>
+        <canvas id="chartZona" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Pendolari e fuori sede</h3>
+        <p class="sub">dove vivono durante l'anno</p>
+        <canvas id="chartCorso" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Come si muovono per gli esami</h3>
+        <p class="sub">mezzo di trasporto principale</p>
+        <canvas id="chartMezzo" height="220"></canvas>
+      </div>
+    </div>
   </div>
 
   <footer>
-    Sondaggio indipendente, non un canale ufficiale dell'ateneo. Le risposte sono anonime.
+    Sondaggio indipendente, non un canale ufficiale dell'ateneo. Le risposte sono anonime. Dati aggiornati in automatico a ogni apertura della pagina.
   </footer>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRGJzK52u-yUkbyCaFKaIyE4gd8rCrPyEiC_5UqaYh4ABe4Iajoa8YwgcwJUt7MFgbxSiUaV7g7N466/pub?output=csv";
+
+function parseCSV(text){
+  var rows = [];
+  var row = [];
+  var field = '';
+  var inQuotes = false;
+  for (var i = 0; i < text.length; i++){
+    var c = text[i];
+    if (inQuotes){
+      if (c === '"'){
+        if (text[i+1] === '"'){ field += '"'; i++; }
+        else { inQuotes = false; }
+      } else { field += c; }
+    } else {
+      if (c === '"'){ inQuotes = true; }
+      else if (c === ','){ row.push(field); field = ''; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c === '\r'){ /* skip */ }
+      else { field += c; }
+    }
+  }
+  if (field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(function(r){ return r.length > 1 || (r.length === 1 && r[0] !== ''); });
+}
+
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function countBy(values, keys){
+  var counts = {};
+  keys.forEach(function(k){ counts[k] = 0; });
+  values.forEach(function(v){ if (v in counts) counts[v]++; });
+  return counts;
+}
+
+function topN(values, n){
+  var counts = {};
+  values.forEach(function(v){
+    v = (v || '').trim();
+    if (!v) return;
+    counts[v] = (counts[v] || 0) + 1;
+  });
+  var entries = Object.keys(counts).map(function(k){ return [k, counts[k]]; });
+  entries.sort(function(a,b){ return b[1]-a[1]; });
+  return entries.slice(0, n);
+}
+
+function render(rows){
+  var header = rows[0];
+  var data = rows.slice(1);
+  var idxEta = header.indexOf('Quanti anni hai?');
+  var idxGenere = header.indexOf('Genere');
+  var idxProvincia = header.indexOf('Di che provincia sei?');
+  var idxMezzo = header.indexOf("Come raggiungi l'università per gli esami?");
+  var idxPendolare = header.indexOf('Sei pendolare o vivi a Milano?');
+
+  document.getElementById('badge').textContent = data.length + (data.length === 1 ? ' risposta' : ' risposte');
+
+  if (data.length === 0){
+    document.getElementById('emptyTitle').textContent = 'Ancora nessuna risposta';
+    document.getElementById('emptyText').textContent = "Quando arriveranno le prime risposte al sondaggio, qui compariranno i grafici con i dati reali del gruppo.";
+    return;
+  }
+
+  document.getElementById('emptyState').hidden = true;
+  document.getElementById('liveResults').hidden = false;
+
+  var eta = data.map(function(r){ return parseFloat(r[idxEta]); }).filter(function(v){ return !isNaN(v); });
+  var etaMedia = eta.length ? (eta.reduce(function(a,b){ return a+b; },0) / eta.length) : 0;
+  document.getElementById('statCount').textContent = data.length;
+  document.getElementById('statAge').textContent = etaMedia ? etaMedia.toFixed(1) : '-';
+
+  var pendolareVals = data.map(function(r){ return r[idxPendolare]; });
+  var pendolareCounts = countBy(pendolareVals, ['Pendolare', 'Fuori sede a Milano', 'Residente a Milano']);
+  var pendolarePerc = data.length ? Math.round(100 * pendolareCounts['Pendolare'] / data.length) : 0;
+  document.getElementById('statPendolari').textContent = pendolarePerc + '%';
+
+  var mezzoVals = data.map(function(r){ return r[idxMezzo]; });
+  var mezzoCounts = countBy(mezzoVals, ['A piedi', 'Bici o monopattino', 'Mezzi pubblici', 'Auto', 'Treno']);
+  var mezzoTop = Object.keys(mezzoCounts).reduce(function(a,b){ return mezzoCounts[a] >= mezzoCounts[b] ? a : b; });
+  document.getElementById('statMezzo').textContent = mezzoTop;
+
+  var ink = cssVar('--ink-soft'), line = cssVar('--line');
+  var palette = [cssVar('--chart-1'), cssVar('--chart-2'), cssVar('--chart-3'), cssVar('--chart-4'), cssVar('--chart-5')];
+  Chart.defaults.font.family = "'Roboto', sans-serif";
+  Chart.defaults.color = ink;
+  Chart.defaults.borderColor = line;
+
+  var fasce = [0,0,0,0];
+  eta.forEach(function(v){
+    if (v <= 20) fasce[0]++;
+    else if (v <= 23) fasce[1]++;
+    else if (v <= 26) fasce[2]++;
+    else fasce[3]++;
+  });
+  new Chart(document.getElementById('chartEta'), {
+    type: 'bar',
+    data: { labels: ['18-20','21-23','24-26','27+'], datasets: [{ data: fasce, backgroundColor: palette[0], borderRadius: 4, maxBarThickness: 46 }] },
+    options: { plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true, ticks:{precision:0}, grid:{color:line}} } }
+  });
+
+  var provinceTop = topN(data.map(function(r){ return r[idxProvincia]; }), 6);
+  new Chart(document.getElementById('chartZona'), {
+    type: 'doughnut',
+    data: { labels: provinceTop.map(function(e){return e[0];}), datasets:[{ data: provinceTop.map(function(e){return e[1];}), backgroundColor: palette.concat(['#9AABBC']), borderColor: cssVar('--surface'), borderWidth:2 }] },
+    options: { plugins:{legend:{position:'bottom', labels:{boxWidth:12, padding:10, font:{size:11}}}} }
+  });
+
+  new Chart(document.getElementById('chartCorso'), {
+    type: 'doughnut',
+    data: { labels:['Pendolare','Fuori sede a Milano','Residente a Milano'], datasets:[{ data:[pendolareCounts['Pendolare'], pendolareCounts['Fuori sede a Milano'], pendolareCounts['Residente a Milano']], backgroundColor:[palette[1],palette[2],palette[4]], borderColor: cssVar('--surface'), borderWidth:2 }] },
+    options: { plugins:{legend:{position:'bottom', labels:{boxWidth:12, padding:14, font:{size:11.5}}}} }
+  });
+
+  var mezzoLabels = ['A piedi','Bici o monopattino','Mezzi pubblici','Auto','Treno'];
+  new Chart(document.getElementById('chartMezzo'), {
+    type: 'bar',
+    data: { labels: mezzoLabels, datasets:[{ data: mezzoLabels.map(function(l){return mezzoCounts[l];}), backgroundColor: palette[3], borderRadius:4, maxBarThickness:40 }] },
+    options: { plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true, ticks:{precision:0}, grid:{color:line}} } }
+  });
+}
+
+function showError(){
+  document.getElementById('badge').textContent = 'Errore';
+  document.getElementById('emptyTitle').textContent = 'Impossibile caricare i dati';
+  document.getElementById('emptyText').textContent = 'Riprova tra qualche minuto, o controlla la connessione.';
+}
+
+fetch(CSV_URL)
+  .then(function(r){ if (!r.ok) throw new Error('bad status'); return r.text(); })
+  .then(function(text){ render(parseCSV(text)); })
+  .catch(showError);
+</script>
 </body>
 </html>
