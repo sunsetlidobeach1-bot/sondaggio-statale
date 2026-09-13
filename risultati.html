@@ -191,7 +191,7 @@ function showError(){
   document.getElementById('emptyText').textContent = 'Riprova tra qualche minuto, o controlla la connessione.';
 }
 
-fetch(CSV_URL)
+fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' })
   .then(function(r){ if (!r.ok) throw new Error('bad status'); return r.text(); })
   .then(function(text){ render(parseCSV(text)); })
   .catch(showError);
