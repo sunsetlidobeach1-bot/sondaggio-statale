@@ -64,16 +64,19 @@
 <script>
 var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRGJzK52u-yUkbyCaFKaIyE4gd8rCrPyEiC_5UqaYh4ABe4Iajoa8YwgcwJUt7MFgbxSiUaV7g7N466/pub?output=csv";
 
-function loadChartJs(callback, attemptsLeft){
+var CHART_JS_SOURCES = [
+  "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js",
+  "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
+];
+
+function loadChartJs(callback, sourceIndex){
   if (window.Chart){ callback(true); return; }
-  attemptsLeft = attemptsLeft === undefined ? 2 : attemptsLeft;
+  sourceIndex = sourceIndex || 0;
+  if (sourceIndex >= CHART_JS_SOURCES.length){ callback(false); return; }
   var s = document.createElement('script');
-  s.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js";
+  s.src = CHART_JS_SOURCES[sourceIndex];
   s.onload = function(){ callback(true); };
-  s.onerror = function(){
-    if (attemptsLeft > 0){ setTimeout(function(){ loadChartJs(callback, attemptsLeft - 1); }, 700); }
-    else { callback(false); }
-  };
+  s.onerror = function(){ loadChartJs(callback, sourceIndex + 1); };
   document.head.appendChild(s);
 }
 
