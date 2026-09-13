@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ritratto della Statale</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap-narrow">
+  <div class="eyebrow">
+    <span class="eyebrow-left"><span class="seal">A</span> Economia Aziendale &middot; Primo anno &middot; Statale di Milano</span>
+    <a href="risultati.html">Risultati &rarr;</a>
+  </div>
+
+  <div id="introScreen">
+    <h1>Chi siamo, <em>noi della Statale</em>?</h1>
+    <p class="lede">Un sondaggio veloce (5 domande, meno di 1 minuto) per il nostro gruppo: da dove veniamo e come ci muoviamo per gli esami, che seguiamo online. Anonimo, non ufficiale.</p>
+    <div class="card intro-card">
+      <button class="btn btn-primary" id="btnStart" type="button">Inizia il sondaggio</button>
+      <p class="hint" style="margin-top:14px;">Una sola risposta per dispositivo.</p>
+    </div>
+  </div>
+
+  <div id="stepperScreen" hidden>
+    <div class="card stepper-card">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="step-count" id="stepCount">Domanda 1 di 5</div>
+
+      <form id="surveyForm" action="https://docs.google.com/forms/d/e/1FAIpQLSexhNRq0kRU9jle1iDm91oEh8UH9owNs4CKN2VAwpMmmsevUw/formResponse" method="POST" target="hidden_iframe">
+
+        <div class="panel" data-step="0">
+          <h2>Quanti anni hai?</h2>
+          <input type="number" name="entry.1193099521" min="16" max="99" placeholder="es. 20">
+          <p class="field-error">Inserisci un'et&agrave; valida (16&ndash;99).</p>
+        </div>
+
+        <div class="panel" data-step="1" hidden>
+          <h2>Genere</h2>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="entry.1469411859" value="Uomo"><span class="dot"></span>Uomo</label>
+            <label class="choice"><input type="radio" name="entry.1469411859" value="Donna"><span class="dot"></span>Donna</label>
+            <label class="choice"><input type="radio" name="entry.1469411859" value="Altro"><span class="dot"></span>Altro</label>
+            <label class="choice"><input type="radio" name="entry.1469411859" value="Preferisco non rispondere"><span class="dot"></span>Preferisco non rispondere</label>
+          </div>
+          <p class="field-error">Seleziona un'opzione.</p>
+        </div>
+
+        <div class="panel" data-step="2" hidden>
+          <h2>Di che provincia sei?</h2>
+          <input type="text" name="entry.1182764325" list="province-list" placeholder="Inizia a scrivere..." autocomplete="off">
+          <datalist id="province-list">
+            <option value="Agrigento"><option value="Alessandria"><option value="Ancona"><option value="Aosta">
+            <option value="Arezzo"><option value="Ascoli Piceno"><option value="Asti"><option value="Avellino">
+            <option value="Bari"><option value="Barletta-Andria-Trani"><option value="Belluno"><option value="Benevento">
+            <option value="Bergamo"><option value="Biella"><option value="Bologna"><option value="Bolzano">
+            <option value="Brescia"><option value="Brindisi"><option value="Cagliari"><option value="Caltanissetta">
+            <option value="Campobasso"><option value="Caserta"><option value="Catania"><option value="Catanzaro">
+            <option value="Chieti"><option value="Como"><option value="Cosenza"><option value="Cremona">
+            <option value="Crotone"><option value="Cuneo"><option value="Enna"><option value="Fermo">
+            <option value="Ferrara"><option value="Firenze"><option value="Foggia"><option value="Forlì-Cesena">
+            <option value="Frosinone"><option value="Genova"><option value="Gorizia"><option value="Grosseto">
+            <option value="Imperia"><option value="Isernia"><option value="L'Aquila"><option value="La Spezia">
+            <option value="Latina"><option value="Lecce"><option value="Lecco"><option value="Livorno">
+            <option value="Lodi"><option value="Lucca"><option value="Macerata"><option value="Mantova">
+            <option value="Massa-Carrara"><option value="Matera"><option value="Messina"><option value="Milano">
+            <option value="Modena"><option value="Monza e della Brianza"><option value="Napoli"><option value="Novara">
+            <option value="Nuoro"><option value="Oristano"><option value="Padova"><option value="Palermo">
+            <option value="Parma"><option value="Pavia"><option value="Perugia"><option value="Pesaro e Urbino">
+            <option value="Pescara"><option value="Piacenza"><option value="Pisa"><option value="Pistoia">
+            <option value="Pordenone"><option value="Potenza"><option value="Prato"><option value="Ragusa">
+            <option value="Ravenna"><option value="Reggio Calabria"><option value="Reggio Emilia"><option value="Rieti">
+            <option value="Rimini"><option value="Roma"><option value="Rovigo"><option value="Salerno">
+            <option value="Sassari"><option value="Savona"><option value="Siena"><option value="Siracusa">
+            <option value="Sondrio"><option value="Sud Sardegna"><option value="Taranto"><option value="Teramo">
+            <option value="Terni"><option value="Torino"><option value="Trapani"><option value="Trento">
+            <option value="Treviso"><option value="Trieste"><option value="Udine"><option value="Varese">
+            <option value="Venezia"><option value="Verbano-Cusio-Ossola"><option value="Vercelli"><option value="Verona">
+            <option value="Vibo Valentia"><option value="Vicenza"><option value="Viterbo"><option value="Estero">
+          </datalist>
+          <p class="field-error">Scrivi il nome della tua provincia.</p>
+        </div>
+
+        <div class="panel" data-step="3" hidden>
+          <h2>Come raggiungi l'universit&agrave; per gli esami?</h2>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="entry.139736249" value="A piedi"><span class="dot"></span>A piedi</label>
+            <label class="choice"><input type="radio" name="entry.139736249" value="Bici o monopattino"><span class="dot"></span>Bici o monopattino</label>
+            <label class="choice"><input type="radio" name="entry.139736249" value="Mezzi pubblici"><span class="dot"></span>Mezzi pubblici</label>
+            <label class="choice"><input type="radio" name="entry.139736249" value="Auto"><span class="dot"></span>Auto</label>
+            <label class="choice"><input type="radio" name="entry.139736249" value="Treno"><span class="dot"></span>Treno</label>
+          </div>
+          <p class="field-error">Seleziona un'opzione.</p>
+        </div>
+
+        <div class="panel" data-step="4" hidden>
+          <h2>Sei pendolare o vivi a Milano?</h2>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="entry.1062147121" value="Pendolare"><span class="dot"></span>Pendolare</label>
+            <label class="choice"><input type="radio" name="entry.1062147121" value="Fuori sede a Milano"><span class="dot"></span>Fuori sede a Milano</label>
+            <label class="choice"><input type="radio" name="entry.1062147121" value="Residente a Milano"><span class="dot"></span>Residente a Milano</label>
+          </div>
+          <p class="field-error">Seleziona un'opzione.</p>
+        </div>
+
+        <div class="nav-row">
+          <button type="button" class="btn btn-text" id="btnBack">&larr; Indietro</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-primary" id="btnNext">Avanti</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmit" hidden>Invia risposta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" id="thankYou">
+    <div class="check">&check;</div>
+    <h3>Grazie, risposta inviata!</h3>
+    <p>Puoi chiudere questa scheda oppure dare un&rsquo;occhiata ai risultati.</p>
+    <a class="btn btn-primary" href="risultati.html">Vai ai risultati</a>
+  </div>
+
+  <div class="card" id="alreadyDone">
+    <div class="check">&check;</div>
+    <h3>Hai gi&agrave; risposto da questo dispositivo</h3>
+    <p>Il sondaggio si compila una sola volta a testa. Grazie!</p>
+    <a class="btn btn-primary" href="risultati.html">Vai ai risultati</a>
+  </div>
+
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none" onload="if(window.__submitted){ document.getElementById('stepperScreen').style.display='none'; document.getElementById('thankYou').style.display='block'; try{localStorage.setItem('sondaggioStatale_submitted','1');}catch(e){} }"></iframe>
+
+  <footer>
+    Sondaggio indipendente, non un canale ufficiale dell'ateneo. Le risposte sono anonime.
+  </footer>
+</div>
+
+<script>
+(function(){
+  try{
+    if(localStorage.getItem('sondaggioStatale_submitted') === '1'){
+      document.getElementById('introScreen').style.display = 'none';
+      document.getElementById('alreadyDone').style.display = 'block';
+      return;
+    }
+  }catch(e){}
+
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  var total = panels.length;
+  var current = 0;
+  var progressFill = document.getElementById('progressFill');
+  var stepCount = document.getElementById('stepCount');
+  var btnBack = document.getElementById('btnBack');
+  var btnNext = document.getElementById('btnNext');
+  var btnSubmit = document.getElementById('btnSubmit');
+  var introScreen = document.getElementById('introScreen');
+  var stepperScreen = document.getElementById('stepperScreen');
+  var form = document.getElementById('surveyForm');
+
+  function validate(i){
+    var panel = panels[i];
+    var errEl = panel.querySelector('.field-error');
+    var num = panel.querySelector('input[type="number"]');
+    var text = panel.querySelector('input[type="text"]');
+    var radios = panel.querySelectorAll('input[type="radio"]');
+    var ok = true;
+    if(num){
+      var v = Number(num.value);
+      ok = num.value.trim() !== '' && v >= Number(num.min) && v <= Number(num.max);
+    } else if(text){
+      ok = text.value.trim() !== '';
+    } else if(radios.length){
+      ok = Array.prototype.some.call(radios, function(r){ return r.checked; });
+    }
+    if(errEl) errEl.style.display = ok ? 'none' : 'block';
+    return ok;
+  }
+
+  function render(){
+    panels.forEach(function(p, idx){ p.hidden = idx !== current; });
+    progressFill.style.width = ((current + 1) / total * 100) + '%';
+    stepCount.textContent = 'Domanda ' + (current + 1) + ' di ' + total;
+    btnBack.style.visibility = current === 0 ? 'hidden' : 'visible';
+    btnNext.hidden = current === total - 1;
+    btnSubmit.hidden = current !== total - 1;
+  }
+
+  btnNext.addEventListener('click', function(){
+    if(!validate(current)) return;
+    current = Math.min(current + 1, total - 1);
+    render();
+  });
+  btnBack.addEventListener('click', function(){
+    current = Math.max(current - 1, 0);
+    render();
+  });
+  form.addEventListener('submit', function(e){
+    if(!validate(current)){ e.preventDefault(); return; }
+    window.__submitted = true;
+  });
+  document.getElementById('btnStart').addEventListener('click', function(){
+    introScreen.style.display = 'none';
+    stepperScreen.hidden = false;
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
