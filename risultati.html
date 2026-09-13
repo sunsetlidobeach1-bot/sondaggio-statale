@@ -61,9 +61,30 @@
   </footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script>
 var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRGJzK52u-yUkbyCaFKaIyE4gd8rCrPyEiC_5UqaYh4ABe4Iajoa8YwgcwJUt7MFgbxSiUaV7g7N466/pub?output=csv";
+
+function loadChartJs(callback, attemptsLeft){
+  if (window.Chart){ callback(true); return; }
+  attemptsLeft = attemptsLeft === undefined ? 2 : attemptsLeft;
+  var s = document.createElement('script');
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js";
+  s.onload = function(){ callback(true); };
+  s.onerror = function(){
+    if (attemptsLeft > 0){ setTimeout(function(){ loadChartJs(callback, attemptsLeft - 1); }, 700); }
+    else { callback(false); }
+  };
+  document.head.appendChild(s);
+}
+
+function showChartsUnavailable(){
+  document.querySelectorAll('.chart-card canvas').forEach(function(c){
+    var msg = document.createElement('p');
+    msg.className = 'sub';
+    msg.textContent = 'Grafico non disponibile al momento. Ricarica la pagina.';
+    c.replaceWith(msg);
+  });
+}
 
 function parseCSV(text){
   var rows = [];
@@ -145,6 +166,9 @@ function render(rows){
   var mezzoTop = Object.keys(mezzoCounts).reduce(function(a,b){ return mezzoCounts[a] >= mezzoCounts[b] ? a : b; });
   document.getElementById('statMezzo').textContent = mezzoTop;
 
+  if (!window.Chart){ showChartsUnavailable(); return; }
+
+  try{
   var ink = cssVar('--ink-soft'), line = cssVar('--line');
   var palette = [cssVar('--chart-1'), cssVar('--chart-2'), cssVar('--chart-3'), cssVar('--chart-4'), cssVar('--chart-5')];
   Chart.defaults.font.family = "'Roboto', sans-serif";
@@ -183,6 +207,10 @@ function render(rows){
     data: { labels: mezzoLabels, datasets:[{ data: mezzoLabels.map(function(l){return mezzoCounts[l];}), backgroundColor: palette[3], borderRadius:4, maxBarThickness:40 }] },
     options: { plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true, ticks:{precision:0}, grid:{color:line}} } }
   });
+  } catch(err){
+    console.error('Errore nel disegno dei grafici:', err);
+    showChartsUnavailable();
+  }
 }
 
 function showError(){
@@ -191,9 +219,13 @@ function showError(){
   document.getElementById('emptyText').textContent = 'Riprova tra qualche minuto, o controlla la connessione.';
 }
 
-fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' })
+var chartJsReady = new Promise(function(resolve){ loadChartJs(resolve); });
+var csvReady = fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' })
   .then(function(r){ if (!r.ok) throw new Error('bad status'); return r.text(); })
-  .then(function(text){ render(parseCSV(text)); })
+  .then(function(text){ return parseCSV(text); });
+
+Promise.all([csvReady, chartJsReady])
+  .then(function(results){ render(results[0]); })
   .catch(showError);
 </script>
 </body>
